@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyToken DApp</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 3px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        .balance-display {
+            text-align: center;
+            padding: 20px;
+            background: #E2A90D;
+            border-radius: 4px;
+            color: white;
+        }
+
+        .balance-amount {
+            font-size: 36px;
+            font-weight: 700;
+        }
+
+        .balance-symbol {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #E2A90D;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .btn-connect {
+            background: #E2A90D;
+            color: white;
+        }
+
+        .btn-transfer {
+            background: #E2A90D;
+            color: white;
+        }
+
+        .btn-refresh {
+            background: #E2A90D;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-box {
+            padding: 12px 15px;
+            border-radius: 2px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .status-error {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c00;
+        }
+
+        .status-success {
+            background: #efe;
+            border: 1px solid #cfc;
+            color: #060;
+        }
+
+        .status-pending {
+            background: #ffd;
+            border: 1px solid #ffc;
+            color: #960;
+        }
+
+        .events-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .event-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 2px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .event-item .from {
+            color: #e74c3c;
+        }
+
+        .event-item .to {
+            color: #27ae60;
+        }
+
+        .event-item .amount {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .connected {
+            color: #27ae60;
+        }
+
+        .disconnected {
+            color: #e74c3c;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #fff;
+            border-top-color: transparent;
+            border-radius: 3px;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MyToken DApp</h1>
+
+        <!-- Connection -->
+        <div class="card">
+            <div class="card-title">Wallet Connection</div>
+            <div class="info-row">
+                <span class="info-label">Status:</span>
+                <span class="info-value disconnected" id="connectionStatus">Not Connected</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Account:</span>
+                <span class="info-value" id="accountAddress">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Network:</span>
+                <span class="info-value" id="networkName">-</span>
+            </div>
+            <button class="btn btn-connect" id="connectBtn" onclick="connectWallet()">
+                Connect MetaMask
+            </button>
+        </div>
+
+        <!-- Balance -->
+        <div class="card">
+            <div class="card-title">Your Balance</div>
+            <div class="balance-display">
+                <div class="balance-amount" id="tokenBalance">0</div>
+                <div class="balance-symbol" id="tokenSymbol">MTK</div>
+            </div>
+            <button class="btn btn-refresh" onclick="refreshBalance()" style="margin-top: 15px;">
+                Refresh Balance
+            </button>
+        </div>
+
+        <!-- Transfer -->
+        <div class="card">
+            <div class="card-title">Transfer Tokens</div>
+            <div class="input-group">
+                <label for="recipientAddress">Recipient Address</label>
+                <input type="text" id="recipientAddress" placeholder="0x...">
+            </div>
+            <div class="input-group">
+                <label for="transferAmount">Amount</label>
+                <input type="number" id="transferAmount" placeholder="100" min="0" step="0.01">
+            </div>
+            <button class="btn btn-transfer" id="transferBtn" onclick="transferTokens()" disabled>
+                Transfer
+            </button>
+            <div class="status-box" id="transferStatus"></div>
+        </div>
+
+        <!-- Events -->
+        <div class="card">
+            <div class="card-title">Recent Transfers</div>
+            <div class="events-list" id="eventsList">
+                <div class="event-item" style="text-align: center; color: #999;">
+                    No transfers yet
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ethers.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+    <script src="token-app.js"></script>
+</body>
+</html>
